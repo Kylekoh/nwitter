@@ -11,7 +11,13 @@ function App() {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLoggedIn(true);
-        setUserObj(user);
+        // 객체가 크면 생기는 버그를 잡기위해 객체의 일부만 가져온다
+        // setUserObj(user)
+        setUserObj({
+          displayName: user.displayName,
+          uid: user.uid,
+          updateProfile: (args) => user.updateProfile(args),
+        });
       } else {
         setIsLoggedIn(false);
       }
@@ -19,10 +25,23 @@ function App() {
     });
   }, []);
 
+  const refreshUser = () => {
+    const user = authService.currentUser;
+    setUserObj({
+      displayName: user.displayName,
+      uid: user.uid,
+      updateProfile: (args) => user.updateProfile(args),
+    });
+  };
+
   return (
     <>
       {init ? (
-        <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
+        <AppRouter
+          isLoggedIn={isLoggedIn}
+          userObj={userObj}
+          refreshUser={refreshUser}
+        />
       ) : (
         "Initializing..."
       )}
